@@ -9,17 +9,17 @@
 (function(window, undefined) {
 
 	/**
-	 * A pure-JS implementation of bind based on Google's implementation.
+	 * A pure-JS implementation of bind.
 	 * @param {Function} fn A function to partially apply.
 	 * @param {Object|undefined} selfObj Specifies the object which |this| should
 	 *     point to when the function is run.
-	 * @param {...*} var_args Additional arguments that are partially
+	 * @param {...*} arguments Additional arguments that are partially
 	 *     applied to the function.
 	 * @return {!Function} A partially-applied form of the function bind() was
 	 *     invoked as a method of.
 	 * @private
 	 */
-	var BIND = function(fn, selfObj, var_args) {
+	var BIND = function(fn, selfObj, arguments) {
 		if (!fn) {
 			throw new Error();
 		}
@@ -42,14 +42,13 @@
 	
 	/**
 	 * Constructs an AVL-Tree, which uses the specified comparator to order its
-	 * values. The values can be accessed efficiently in their sorted order since
-	 * the tree enforces a O(logn) maximum height.
+	 * values. The tree enforces a O(logn) maximum height.
 	 *
 	 * @param {Function=} comparator Function used to order the tree's nodes.
 	 * @constructor
 	 */
 	AVLTree = function(comparator) {
-		this.comparator_ = comparator || AVLTree.DEFAULT_COMPARATOR_;
+		this._comparator = comparator || AVLTree.DEFAULT_COMPARATOR;
 	};
 
 	/**
@@ -61,7 +60,7 @@
 	 * @return {number} -1 if a < b, 1 if a > b, 0 if a = b.
 	 * @private
 	 */
-	AVLTree.DEFAULT_COMPARATOR_ = function(a, b) {
+	AVLTree.DEFAULT_COMPARATOR = function(a, b) {
 		if (String(a) < String(b)) {
 			return -1;
 		} else if (String(a) > String(b)) {
@@ -76,21 +75,19 @@
 	 * @type {AVLTree.Node}
 	 * @private
 	 */
-	AVLTree.prototype.root_ = null;
+	AVLTree.prototype._root = null;
 
 	/**
 	 * Comparison function used to compare values in the tree. This function should
 	 * take two values, a and b, and return x where:
-	 * <pre>
 	 *  x < 0 if a < b,
 	 *  x > 0 if a > b,
 	 *  x = 0 otherwise
-	 * </pre>
 	 *
 	 * @type {Function}
 	 * @private
 	 */
-	AVLTree.prototype.comparator_ = null;
+	AVLTree.prototype._comparator = null;
 
 	/**
 	 * Pointer to the node with the smallest value in the tree.
@@ -98,7 +95,7 @@
 	 * @type {AVLTree.Node}
 	 * @private
 	 */
-	AVLTree.prototype.minNode_ = null;
+	AVLTree.prototype._minNode = null;
 
 	/**
 	 * Pointer to the node with the largest value in the tree.
@@ -106,63 +103,60 @@
 	 * @type {AVLTree.Node}
 	 * @private
 	 */
-	AVLTree.prototype.maxNode_ = null;
+	AVLTree.prototype._maxNode = null;
 
 	/**
-	 * Inserts a node into the tree with the specified value if the tree does
-	 * not already contain a node with the specified value. If the value is
-	 * inserted, the tree is balanced to enforce the AVL-Tree height property.
+	 * Inserts a node into the tree with the specified value if its not a 
+	 * dupliacte. If the value is inserted, the tree is balanced to enforce
+	 * the AVL-Tree height property.
 	 *
 	 * @param {*} value Value to insert into the tree.
 	 * @return {boolean} Whether value was inserted into the tree.
-	 * @override
 	 */
 	AVLTree.prototype.add = function(value) {
-		// If the tree is empty, create a root node with the specified value
-		if (this.root_ == null) {
-			this.root_ = new AVLTree.Node(value);
-			this.minNode_ = this.root_;
-			this.maxNode_ = this.root_;
+		// If the tree is empty, create a root node with the specified value and stop there.
+		if (this._root == null) {
+			this._root = new AVLTree.Node(value);
+			this._minNode = this._root;
+			this._maxNode = this._root;
 			return true;
 		}
 
 		// This will be set to the new node if a new node is added.
 		var newNode = null;
 
-		// Depth traverse the tree and insert the value if we reach a null node
-		this.traverse_(function(node) {
+		// Traverse the tree and insert the value if we reach a null node
+		this._traverse(function(node) {
 			var retNode = null;
-			if (this.comparator_(node.value, value) > 0) {
-				retNode = node.left;
-				if (node.left == null) {
+			if (this._comparator(node.value, value) > 0) {
+				retNode = node._left;
+				if (node._left == null) {
 					newNode = new AVLTree.Node(value, node);
-					node.left = newNode;
-					if (node == this.minNode_) {
-						this.minNode_ = newNode;
+					node._left = newNode;
+					if (node == this._minNode) {
+						this._minNode = newNode;
 					}
 				}
-			} else if (this.comparator_(node.value, value) < 0) {
-				retNode = node.right;
-				if (node.right == null) {
+			} else if (this._comparator(node.value, value) < 0) {
+				retNode = node._right;
+				if (node._right == null) {
 					newNode = new AVLTree.Node(value, node);
-					node.right = newNode;
-					if (node == this.maxNode_) {
-						this.maxNode_ = newNode;
+					node._right = newNode;
+					if (node == this._maxNode) {
+						this._maxNode = newNode;
 					}
 				}
 			}
-			return retNode;
-			// If null, we'll stop traversing the tree
+			return retNode; // If null, we'll stop traversing the tree
 		});
 
 		// If a node was added, increment counts and balance tree.
 		if (newNode) {
-			this.traverse_(function(node) {
+			this._traverse(function(node) {
 				node.count++;
-				return node.parent;
-			}, newNode.parent);
-			this.balance_(newNode.parent);
-			// Maintain the AVL-tree balance
+				return node._parent;
+			}, newNode._parent);
+			this._balance(newNode._parent);  // Maintain the AVL-tree balance
 		}
 
 		// Return true if a node was added, false otherwise
@@ -170,32 +164,30 @@
 	};
 
 	/**
-	 * Removes a node from the tree with the specified value if the tree contains a
-	 * node with this value. If a node is removed the tree is balanced to enforce
-	 * the AVL-Tree height property. The value of the removed node is returned.
+	 * Removes a node from the tree with the specified value if it exists. If 
+	 * a node is removed the tree is balanced again. The value of the removed 
+	 * node is returned or null.
 	 *
 	 * @param {*} value Value to find and remove from the tree.
 	 * @return {*} The value of the removed node or null if the value was not in
 	 *     the tree.
-	 * @override
 	 */
 	AVLTree.prototype.remove = function(value) {
 		// Assume the value is not removed and set the value when it is removed
 		var retValue = null;
 
 		// Depth traverse the tree and remove the value if we find it
-		this.traverse_(function(node) {
+		this._traverse(function(node) {
 			var retNode = null;
-			if (this.comparator_(node.value, value) > 0) {
-				retNode = node.left;
-			} else if (this.comparator_(node.value, value) < 0) {
-				retNode = node.right;
+			if (this._comparator(node.value, value) > 0) {
+				retNode = node._left;
+			} else if (this._comparator(node.value, value) < 0) {
+				retNode = node._right;
 			} else {
 				retValue = node.value;
-				this.removeNode_(node);
+				this._removeNode(node);
 			}
-			return retNode;
-			// If null, we'll stop traversing the tree
+			return retNode;  // If null, we'll stop traversing the tree
 		});
 
 		// Return the value that was removed, null if the value was not in the tree
@@ -206,9 +198,9 @@
 	 * Removes all nodes from the tree.
 	 */
 	AVLTree.prototype.clear = function() {
-		this.root_ = null;
-		this.minNode_ = null;
-		this.maxNode_ = null;
+		this._root = null;
+		this._minNode = null;
+		this._maxNode = null;
 	};
 
 	/**
@@ -217,19 +209,18 @@
 	 *
 	 * @param {*} value Value to find in the tree.
 	 * @return {boolean} Whether the tree contains a node with the specified value.
-	 * @override
 	 */
 	AVLTree.prototype.contains = function(value) {
 		// Assume the value is not in the tree and set this value if it is found
 		var isContained = false;
 
 		// Depth traverse the tree and set isContained if we find the node
-		this.traverse_(function(node) {
+		this._traverse(function(node) {
 			var retNode = null;
-			if (this.comparator_(node.value, value) > 0) {
-				retNode = node.left;
-			} else if (this.comparator_(node.value, value) < 0) {
-				retNode = node.right;
+			if (this._comparator(node.value, value) > 0) {
+				retNode = node._left;
+			} else if (this._comparator(node.value, value) < 0) {
+				retNode = node._right;
 			} else {
 				isContained = true;
 			}
@@ -245,54 +236,49 @@
 	 * Returns the number of values stored in the tree.
 	 *
 	 * @return {number} The number of values stored in the tree.
-	 * @override
 	 */
 	AVLTree.prototype.getCount = function() {
-		return this.root_ ? this.root_.count : 0;
+		return this._root ? this._root.count : 0;
 	};
 
 	/**
-	 * Returns a k-th smallest value, based on the comparator, where 0 <= k <
-	 * this.getCount().
-	 * @param {number} k The number k.
-	 * @return {*} The k-th smallest value.
+	 * Returns an n-th smallest value, based on the comparator:
+	 * where 0 <= n < this.getCount().
+	 * @param {number} n The number n.
+	 * @return {*} The n-th smallest value.
 	 */
-	AVLTree.prototype.getKthValue = function(k) {
-		if (k < 0 || k >= this.getCount()) {
+	AVLTree.prototype.getNthValue = function(n) {
+		if (n < 0 || n >= this.getCount()) {
 			return null;
 		}
-		return this.getKthNode_(k).value;
+		return this._getNthNode(n).value;
 	};
 
 	/**
-	 * Returns the value u, such that u is contained in the tree and u < v, for all
-	 * values v in the tree where v != u.
+	 * Returns the smallest value in the tree.
 	 *
 	 * @return {*} The minimum value contained in the tree.
 	 */
 	AVLTree.prototype.getMinimum = function() {
-		return this.getMinNode_().value;
+		return this._getMinNode().value;
 	};
 
 	/**
-	 * Returns the value u, such that u is contained in the tree and u > v, for all
-	 * values v in the tree where v != u.
+	 * Returns the largest value in the tree.
 	 *
 	 * @return {*} The maximum value contained in the tree.
 	 */
 	AVLTree.prototype.getMaximum = function() {
-		return this.getMaxNode_().value;
+		return this._getMaxNode().value;
 	};
 
 	/**
-	 * Returns the height of the tree (the maximum depth). This height should
-	 * always be <= 1.4405*(Math.log(n+2)/Math.log(2))-1.3277, where n is the
-	 * number of nodes in the tree.
+	 * Returns the height of the tree (the maximum depth).
 	 *
 	 * @return {number} The height of the tree.
 	 */
 	AVLTree.prototype.getHeight = function() {
-		return this.root_ ? this.root_.height : 0;
+		return this._root ? this._root.height : 0;
 	};
 
 	/**
@@ -301,18 +287,18 @@
 	 * @return {Array} An array containing all of the trees values in sorted order.
 	 */
 	AVLTree.prototype.getValues = function() {
-		var ret = [];
+		var retVal = [];
 		this.inOrderTraverse(function(value) {
-			ret.push(value);
+			retVal.push(value);
 		});
-		return ret;
+		return retVal;
 	};
 
 	/**
-	 * Performs an in-order traversal of the tree and calls {@code func} with each
-	 * traversed node, optionally starting from the smallest node with a value >= to
-	 * the specified start value. The traversal ends after traversing the tree's
-	 * maximum node or when {@code func} returns a value that evaluates to true.
+	 * Performs an in-order traversal of the tree and calls the passed function on each
+	 * traversed node. Optionally starting from the smallest node with a value >= to
+	 * startValue. The traversal ends after traversing the tree's maximum node or when
+	 * the passed function returns true.
 	 *
 	 * @param {Function} func Function to call on each traversed node.
 	 * @param {Object=} startValue If specified, traversal will begin on the
@@ -320,53 +306,52 @@
 	 */
 	AVLTree.prototype.inOrderTraverse = function(func, startValue) {
 		// If our tree is empty, return immediately
-		if (!this.root_) {
+		if (!this._root) {
 			return;
 		}
 
 		// Depth traverse the tree to find node to begin in-order traversal from
 		var startNode;
 		if (startValue) {
-			this.traverse_(function(node) {
+			this._traverse(function(node) {
 				var retNode = null;
-				if (this.comparator_(node.value, startValue) > 0) {
-					retNode = node.left;
+				if (this._comparator(node.value, startValue) > 0) {
+					retNode = node._left;
 					startNode = node;
-				} else if (this.comparator_(node.value, startValue) < 0) {
-					retNode = node.right;
+				} else if (this._comparator(node.value, startValue) < 0) {
+					retNode = node._right;
 				} else {
 					startNode = node;
 				}
-				return retNode;
-				// If null, we'll stop traversing the tree
+				return retNode;  // If null, we'll stop traversing the tree
 			});
 		} else {
-			startNode = this.getMinNode_();
+			startNode = this._getMinNode();
 		}
 
 		// Traverse the tree and call func on each traversed node's value
-		var node = startNode, prev = startNode.left ? startNode.left : startNode;
+		var node = startNode, previous = startNode._left ? startNode._left : startNode;
 		while (node != null) {
-			if (node.left != null && node.left != prev && node.right != prev) {
-				node = node.left;
+			if (node._left != null && node._left != previous && node._right != previous) {
+				node = node._left;
 			} else {
-				if (node.right != prev) {
+				if (node._right != previous) {
 					if (func(node.value)) {
 						return;
 					}
 				}
 				var temp = node;
-				node = node.right != null && node.right != prev ? node.right : node.parent;
-				prev = temp;
+				node = node._right != null && node._right != previous ? node._right : node._parent;
+				previous = temp;
 			}
 		}
 	};
 
 	/**
-	 * Performs a reverse-order traversal of the tree and calls {@code func} with
-	 * each traversed node, optionally starting from the largest node with a value
-	 * <= to the specified start value. The traversal ends after traversing the
-	 * tree's minimum node or when func returns a value that evaluates to true.
+	 * Performs a reverse-order traversal of the tree and calls the passed function on
+	 * each node. Optionally starts from the largest node with a value <= to the specified 
+	 * start value. The traversal ends after traversing the tree's minimum node or when
+	 * the passed function returns true.
 	 *
 	 * @param {Function} func Function to call on each traversed node.
 	 * @param {Object=} startValue If specified, traversal will begin on the
@@ -374,19 +359,19 @@
 	 */
 	AVLTree.prototype.reverseOrderTraverse = function(func, startValue) {
 		// If our tree is empty, return immediately
-		if (!this.root_) {
+		if (!this._root) {
 			return;
 		}
 
 		// Depth traverse the tree to find node to begin reverse-order traversal from
 		var startNode;
 		if (startValue) {
-			this.traverse_(BIND(function(node) {
+			this._traverse(BIND(function(node) {
 				var retNode = null;
-				if (this.comparator_(node.value, startValue) > 0) {
-					retNode = node.left;
-				} else if (this.comparator_(node.value, startValue) < 0) {
-					retNode = node.right;
+				if (this._comparator(node.value, startValue) > 0) {
+					retNode = node._left;
+				} else if (this._comparator(node.value, startValue) < 0) {
+					retNode = node._right;
 					startNode = node;
 				} else {
 					startNode = node;
@@ -395,45 +380,53 @@
 				// If null, we'll stop traversing the tree
 			}, this));
 		} else {
-			startNode = this.getMaxNode_();
+			startNode = this._getMaxNode();
 		}
 
 		// Traverse the tree and call func on each traversed node's value
-		var node = startNode, prev = startNode.right ? startNode.right : startNode;
+		var node = startNode, prev = startNode._right ? startNode._right : startNode;
 		while (node != null) {
-			if (node.right != null && node.right != prev && node.left != prev) {
-				node = node.right;
+			if (node._right != null && node._right != prev && node._left != prev) {
+				node = node._right;
 			} else {
-				if (node.left != prev) {
+				if (node._left != prev) {
 					if (func(node.value)) {
 						return;
 					}
 				}
 				var temp = node;
-				node = node.left != null && node.left != prev ? node.left : node.parent;
+				node = node._left != null && node._left != prev ? node._left : node._parent;
 				prev = temp;
 			}
 		}
 	};
+	
+	/**
+	 * Outputs the AVLTree to console. Internet Explorer hates this with a passion.
+	 * Use only for debug purposes.
+	 */
+	AVLTree.prototype.printAVLTree = function() {
+		if(this._root !== null) {
+			return this._root._inOrderPrint();
+		}
+		return false;
+	}
 
 	/**
-	 * Performs a traversal defined by the supplied {@code traversalFunc}. The first
-	 * call to {@code traversalFunc} is passed the root or the optionally specified
-	 * startNode. After that, calls {@code traversalFunc} with the node returned
-	 * by the previous call to {@code traversalFunc} until {@code traversalFunc}
-	 * returns null or the optionally specified endNode. The first call to
-	 * traversalFunc is passed the root or the optionally specified startNode.
+	 * Performs a traversal defined by the supplied traversal function. The first
+	 * call to the traversal function is performed on the root or the optionally
+	 * specified startNode. After that, it calls the traversal function with the
+	 * node returned by the previous call until the traversal function returns 
+	 * null or the optionally specified end node.
 	 *
 	 * @param {Function} traversalFunc Function used to traverse the tree. Takes a
 	 *     node as a parameter and returns a node.
-	 * @param {AVLTree.Node=} startNode The node at which the
-	 *     traversal begins.
-	 * @param {AVLTree.Node=} endNode The node at which the
-	 *     traversal ends.
+	 * @param {AVLTree.Node=} startNode The node at which the traversal begins.
+	 * @param {AVLTree.Node=} endNode The node at which the traversal ends.
 	 * @private
 	 */
-	AVLTree.prototype.traverse_ = function(traversalFunc, startNode, endNode) {
-		var node = startNode ? startNode : this.root_;
+	AVLTree.prototype._traverse = function(traversalFunc, startNode, endNode) {
+		var node = startNode ? startNode : this._root;
 		var endNode = endNode ? endNode : null;
 		while (node && node != endNode) {
 			node = traversalFunc.call(this, node);
@@ -442,77 +435,77 @@
 
 	/**
 	 * Ensures that the specified node and all its ancestors are balanced. If they
-	 * are not, performs left and right tree rotations to achieve a balanced
-	 * tree. This method assumes that at most 2 rotations are necessary to balance
+	 * are not, performs left and right rotations to achieve a balanced tree. This 
+	 * method assumes that at most 2 rotations are necessary to balance
 	 * the tree (which is true for AVL-trees that are balanced after each node is
 	 * added or removed).
 	 *
 	 * @param {AVLTree.Node} node Node to begin balance from.
 	 * @private
 	 */
-	AVLTree.prototype.balance_ = function(node) {
+	AVLTree.prototype._balance = function(node) {
 
-		this.traverse_(function(node) {
+		this._traverse(function(node) {
 			// Calculate the left and right node's heights
-			var lh = node.left ? node.left.height : 0;
-			var rh = node.right ? node.right.height : 0;
+			var leftHeight = node._left ? node._left.height : 0;
+			var rightHeight = node._right ? node._right.height : 0;
 
 			// Rotate tree rooted at this node if it is not AVL-tree balanced
-			if (lh - rh > 1) {
-				if (node.left.right && (!node.left.left || node.left.left.height < node.left.right.height)) {
-					this.leftRotate_(node.left);
+			if (leftHeight - rightHeight > 1) {
+				if (node._left._right && (!node._left._left || node._left._left.height < node._left._right.height)) {
+					this._leftRotate(node._left);
 				}
-				this.rightRotate_(node);
-			} else if (rh - lh > 1) {
-				if (node.right.left && (!node.right.right || node.right.right.height < node.right.left.height)) {
-					this.rightRotate_(node.right);
+				this._rightRotate(node);
+			} else if (rightHeight - leftHeight > 1) {
+				if (node._right._left && (!node._right._right || node._right._right.height < node._right._left.height)) {
+					this._rightRotate(node._right);
 				}
-				this.leftRotate_(node);
+				this._leftRotate(node);
 			}
 
 			// Recalculate the left and right node's heights
-			lh = node.left ? node.left.height : 0;
-			rh = node.right ? node.right.height : 0;
+			leftHeight = node._left ? node._left.height : 0;
+			rightHeight = node._right ? node._right.height : 0;
 
 			// Set this node's height
-			node.height = Math.max(lh, rh) + 1;
+			node.height = Math.max(leftHeight, rightHeight) + 1;
 
 			// Traverse up tree and balance parent
-			return node.parent;
+			return node._parent;
 		}, node);
 
 	};
 
 	/**
-	 * Performs a left tree rotation on the specified node.
+	 * Performs a left rotation on the specified node.
 	 *
 	 * @param {AVLTree.Node} node Pivot node to rotate from.
 	 * @private
 	 */
-	AVLTree.prototype.leftRotate_ = function(node) {
+	AVLTree.prototype._leftRotate = function(node) {
 		// Re-assign parent-child references for the parent of the node being removed
 		if (node.isLeftChild()) {
-			node.parent.left = node.right;
-			node.right.parent = node.parent;
+			node._parent._left = node._right;
+			node._right._parent = node._parent;
 		} else if (node.isRightChild()) {
-			node.parent.right = node.right;
-			node.right.parent = node.parent;
+			node._parent._right = node._right;
+			node._right._parent = node._parent;
 		} else {
-			this.root_ = node.right;
-			this.root_.parent = null;
+			this._root = node._right;
+			this._root._parent = null;
 		}
 
 		// Re-assign parent-child references for the child of the node being removed
-		var temp = node.right;
-		node.right = node.right.left;
-		if (node.right != null)
-			node.right.parent = node;
-		temp.left = node;
-		node.parent = temp;
+		var temp = node._right;
+		node._right = node._right._left;
+		if (node._right != null)
+			node._right._parent = node;
+		temp._left = node;
+		node._parent = temp;
 
 		// Update counts.
 		temp.count = node.count;
-		node.count -= (temp.right ? temp.right.count : 0) + 1;
+		node.count -= (temp._right ? temp._right.count : 0) + 1;
 	};
 
 	/**
@@ -521,30 +514,30 @@
 	 * @param {AVLTree.Node} node Pivot node to rotate from.
 	 * @private
 	 */
-	AVLTree.prototype.rightRotate_ = function(node) {
+	AVLTree.prototype._rightRotate = function(node) {
 		// Re-assign parent-child references for the parent of the node being removed
 		if (node.isLeftChild()) {
-			node.parent.left = node.left;
-			node.left.parent = node.parent;
+			node._parent._left = node._left;
+			node._left._parent = node._parent;
 		} else if (node.isRightChild()) {
-			node.parent.right = node.left;
-			node.left.parent = node.parent;
+			node._parent._right = node._left;
+			node._left._parent = node._parent;
 		} else {
-			this.root_ = node.left;
-			this.root_.parent = null;
+			this._root = node._left;
+			this._root._parent = null;
 		}
 
 		// Re-assign parent-child references for the child of the node being removed
-		var temp = node.left;
-		node.left = node.left.right;
-		if (node.left != null)
-			node.left.parent = node;
-		temp.right = node;
-		node.parent = temp;
+		var temp = node._left;
+		node._left = node._left._right;
+		if (node._left != null)
+			node._left._parent = node;
+		temp._right = node;
+		node._parent = temp;
 
 		// Update counts.
 		temp.count = node.count;
-		node.count -= (temp.left ? temp.left.count : 0) + 1;
+		node.count -= (temp._left ? temp._left.count : 0) + 1;
 	};
 
 	/**
@@ -554,94 +547,92 @@
 	 * @param {AVLTree.Node} node The node to be removed.
 	 * @private
 	 */
-	AVLTree.prototype.removeNode_ = function(node) {
+	AVLTree.prototype._removeNode = function(node) {
 		// Perform normal binary tree node removal, but balance the tree, starting
 		// from where we removed the node
-		if (node.left != null || node.right != null) {
-			var b = null;
-			// Node to begin balance from
-			var r;
-			// Node to replace the node being removed
-			if (node.left != null) {
-				r = this.getMaxNode_(node.left);
+		if (node._left != null || node._right != null) {
+			var balanceBegin = null;  // Node to begin balance from
+			var replacementNode;  // Node to replace the node being removed
+			if (node._left != null) {
+				r = this._getMaxNode(node._left);
 
 				// Update counts.
-				this.traverse_(function(node) {
+				this._traverse(function(node) {
 					node.count--;
-					return node.parent;
-				}, r);
+					return node._parent;
+				}, replacementNode);
 
-				if (r != node.left) {
-					r.parent.right = r.left;
-					if (r.left)
-						r.left.parent = r.parent;
-					r.left = node.left;
-					r.left.parent = r;
-					b = r.parent;
+				if (replacementNode != node._left) {
+					replacementNode._parent._right = replacementNode._left;
+					if (replacementNode._left)
+						replacementNode._left._parent = replacementNode._parent;
+					replacementNode._left = node._left;
+					replacementNode._left._parent = replacementNode;
+					balanceBegin = replacementNode._parent;
 				}
-				r.parent = node.parent;
-				r.right = node.right;
-				if (r.right)
-					r.right.parent = r;
-				if (node == this.maxNode_)
-					this.maxNode_ = r;
-				r.count = node.count;
+				replacementNode._parent = node._parent;
+				replacementNode._right = node._right;
+				if (replacementNode._right)
+					replacementNode._right._parent = replacementNode;
+				if (node == this._maxNode)
+					this._maxNode = replacementNode;
+				replacementNode.count = node.count;
 			} else {
-				r = this.getMinNode_(node.right);
+				r = this._getMinNode(node._right);
 
 				// Update counts.
-				this.traverse_(function(node) {
+				this._traverse(function(node) {
 					node.count--;
-					return node.parent;
-				}, r);
+					return node._parent;
+				}, replacementNode);
 
-				if (r != node.right) {
-					r.parent.left = r.right;
-					if (r.right)
-						r.right.parent = r.parent;
-					r.right = node.right;
-					r.right.parent = r;
-					b = r.parent;
+				if (replacementNode != node._right) {
+					replacementNode._parent._left = replacementNode._right;
+					if (replacementNode._right)
+						replacementNode._right._parent = replacementNode._parent;
+					replacementNode._right = node._right;
+					replacementNode._right._parent = replacementNode;
+					balanceBegin = replacementNode._parent;
 				}
-				r.parent = node.parent;
-				r.left = node.left;
-				if (r.left)
-					r.left.parent = r;
-				if (node == this.minNode_)
-					this.minNode_ = r;
-				r.count = node.count;
+				replacementNode._parent = node._parent;
+				replacementNode._left = node._left;
+				if (replacementNode._left)
+					replacementNode._left._parent = replacementNode;
+				if (node == this._minNode)
+					this._minNode = replacementNode;
+				replacementNode.count = node.count;
 			}
 
 			// Update the parent of the node being removed to point to its replace
 			if (node.isLeftChild()) {
-				node.parent.left = r;
+				node._parent._left = replacementNode;
 			} else if (node.isRightChild()) {
-				node.parent.right = r;
+				node._parent._right = replacementNode;
 			} else {
-				this.root_ = r;
+				this._root = replacementNode;
 			}
 
 			// Balance the tree
-			this.balance_( b ? b : r);
+			this._balance( balanceBegin ? balanceBegin : replacementNode);
 		} else {
 			// Update counts.
-			this.traverse_(function(node) {
+			this._traverse(function(node) {
 				node.count--;
-				return node.parent;
-			}, node.parent);
+				return node._parent;
+			}, node._parent);
 
 			// If the node is a leaf, remove it and balance starting from its parent
 			if (node.isLeftChild()) {
 				this.special = 1;
-				node.parent.left = null;
-				if (node == this.minNode_)
-					this.minNode_ = node.parent;
-				this.balance_(node.parent);
+				node._parent._left = null;
+				if (node == this._minNode)
+					this._minNode = node._parent;
+				this._balance(node._parent);
 			} else if (node.isRightChild()) {
-				node.parent.right = null;
-				if (node == this.maxNode_)
-					this.maxNode_ = node.parent;
-				this.balance_(node.parent);
+				node._parent._right = null;
+				if (node == this._maxNode)
+					this._maxNode = node._parent;
+				this._balance(node._parent);
 			} else {
 				this.clear();
 			}
@@ -658,16 +649,16 @@
 	 * @return {AVLTree.Node} The node at the specified index.
 	 * @private
 	 */
-	AVLTree.prototype.getKthNode_ = function(k, rootNode) {
-		var root = rootNode || this.root_;
-		var numNodesInLeftSubtree = root.left ? root.left.count : 0;
+	AVLTree.prototype._getKthNode = function(k, rootNode) {
+		var root = rootNode || this._root;
+		var numNodesInLeftSubtree = root._left ? root._left.count : 0;
 
 		if (k < numNodesInLeftSubtree) {
-			return this.getKthNode_(k, root.left);
+			return this._getKthNode(k, root._left);
 		} else if (k == numNodesInLeftSubtree) {
 			return root;
 		} else {
-			return this.getKthNode_(k - numNodesInLeftSubtree - 1, root.right);
+			return this._getKthNode(k - numNodesInLeftSubtree - 1, root._right);
 		}
 	};
 
@@ -680,17 +671,17 @@
 	 *     the tree.
 	 * @private
 	 */
-	AVLTree.prototype.getMinNode_ = function(rootNode) {
+	AVLTree.prototype._getMinNode = function(rootNode) {
 		if (!rootNode) {
-			return this.minNode_;
+			return this._minNode;
 		}
 
 		var minNode = rootNode;
-		this.traverse_(function(node) {
+		this._traverse(function(node) {
 			var retNode = null;
-			if (node.left) {
-				minNode = node.left;
-				retNode = node.left;
+			if (node._left) {
+				minNode = node._left;
+				retNode = node._left;
 			}
 			return retNode;
 			// If null, we'll stop traversing the tree
@@ -708,17 +699,17 @@
 	 *     the tree.
 	 * @private
 	 */
-	AVLTree.prototype.getMaxNode_ = function(rootNode) {
+	AVLTree.prototype._getMaxNode = function(rootNode) {
 		if (!rootNode) {
-			return this.maxNode_;
+			return this._maxNode;
 		}
 
 		var maxNode = rootNode;
-		this.traverse_(function(node) {
+		this._traverse(function(node) {
 			var retNode = null;
-			if (node.right) {
-				maxNode = node.right;
-				retNode = node.right;
+			if (node._right) {
+				maxNode = node._right;
+				retNode = node._right;
 			}
 			return retNode;
 			// If null, we'll stop traversing the tree
@@ -749,7 +740,7 @@
 		 *
 		 * @type {AVLTree.Node}
 		 */
-		this.parent = parent ? parent : null;
+		this._parent = parent ? parent : null;
 
 		/**
 		 * The number of nodes in the subtree rooted at this node.
@@ -758,20 +749,42 @@
 		 */
 		this.count = 1;
 	};
+	
+	/**
+	 * Prints out the ordered list to console. Will break Internet Explorer. Use for debugging only.
+	 * @param {String} padding Used by the method to increase padding for the node.
+	 * @private 
+	 */
+	AVLTree.Node.prototype._inOrderPrint = function(padding) {
+		
+		padding = padding || "";
+		
+		padding = "--" + padding;
+		
+		if(this._left !== null) {
+			this._left._inOrderPrint(padding);
+		}
+		
+		console.log(padding + this.value);
+		
+		if(this._right !== null) {
+			this._right._inOrderPrint(padding);
+		}
+	};
 
 	/**
 	 * The node's left child. Null if the node does not have a left child.
 	 *
 	 * @type {AVLTree.Node?}
 	 */
-	AVLTree.Node.prototype.left = null;
+	AVLTree.Node.prototype._left = null;
 
 	/**
 	 * The node's right child. Null if the node does not have a right child.
 	 *
 	 * @type {AVLTree.Node?}
 	 */
-	AVLTree.Node.prototype.right = null;
+	AVLTree.Node.prototype._right = null;
 
 	/**
 	 * The height of the tree rooted at this node.
@@ -788,7 +801,7 @@
 	 *    child of its parent.
 	 */
 	AVLTree.Node.prototype.isRightChild = function() {
-		return !!this.parent && this.parent.right == this;
+		return !!this._parent && this._parent._right == this;
 	};
 
 	/**
@@ -799,7 +812,7 @@
 	 *    child of its parent.
 	 */
 	AVLTree.Node.prototype.isLeftChild = function() {
-		return !!this.parent && this.parent.left == this;
+		return !!this._parent && this._parent._left == this;
 	};
 
 	// Module Export Code
