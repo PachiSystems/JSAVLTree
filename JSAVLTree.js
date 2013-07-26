@@ -436,9 +436,7 @@
 	/**
 	 * Ensures that the specified node and all its ancestors are balanced. If they
 	 * are not, performs left and right rotations to achieve a balanced tree. This 
-	 * method assumes that at most 2 rotations are necessary to balance
-	 * the tree (which is true for AVL-trees that are balanced after each node is
-	 * added or removed).
+	 * method assumes that at most 2 rotations are necessary to balance the tree.
 	 *
 	 * @param {AVLTree.Node} node Node to begin balance from.
 	 * @private
@@ -640,31 +638,31 @@
 	};
 
 	/**
-	 * Returns the node in the tree that has k nodes before it in an in-order
-	 * traversal, optionally rooted at {@code rootNode}.
+	 * Returns the node in the tree that has n nodes before it in an in-order
+	 * traversal, optionally rooted at the root node.
 	 *
-	 * @param {number} k The number of nodes before the node to be returned in an
-	 *     in-order traversal, where 0 <= k < root.count.
+	 * @param {number} n The number of nodes before the node to be returned in an
+	 *     in-order traversal, where 0 <= n < root.count.
 	 * @param {AVLTree.Node=} rootNode Optional root node.
 	 * @return {AVLTree.Node} The node at the specified index.
 	 * @private
 	 */
-	AVLTree.prototype._getKthNode = function(k, rootNode) {
+	AVLTree.prototype._getNthNode = function(n, rootNode) {
 		var root = rootNode || this._root;
 		var numNodesInLeftSubtree = root._left ? root._left.count : 0;
 
-		if (k < numNodesInLeftSubtree) {
-			return this._getKthNode(k, root._left);
-		} else if (k == numNodesInLeftSubtree) {
+		if (n < numNodesInLeftSubtree) {
+			return this._getNthNode(n, root._left);
+		} else if (n == numNodesInLeftSubtree) {
 			return root;
 		} else {
-			return this._getKthNode(k - numNodesInLeftSubtree - 1, root._right);
+			return this._getNthNode(n - numNodesInLeftSubtree - 1, root._right);
 		}
 	};
 
 	/**
 	 * Returns the node with the smallest value in tree, optionally rooted at
-	 * {@code rootNode}.
+	 * the root node.
 	 *
 	 * @param {AVLTree.Node=} rootNode Optional root node.
 	 * @return {AVLTree.Node} The node with the smallest value in
@@ -692,7 +690,7 @@
 
 	/**
 	 * Returns the node with the largest value in tree, optionally rooted at
-	 * rootNode.
+	 * the root node.
 	 *
 	 * @param {AVLTree.Node=} rootNode Optional root node.
 	 * @return {AVLTree.Node} The node with the largest value in
@@ -720,38 +718,22 @@
 
 	/**
 	 * Constructs an AVL-Tree node with the specified value. If no parent is
-	 * specified, the node's parent is assumed to be null. The node's height
-	 * defaults to 1 and its children default to null.
+	 * specified, the node's parent is assumed to be null and thus, root. The
+	 * node's height defaults to 1 and its children default to null.
 	 *
 	 * @param {*} value Value to store in the node.
 	 * @param {AVLTree.Node=} parent Optional parent node.
 	 * @constructor
 	 */
 	AVLTree.Node = function(value, parent) {
-		/**
-		 * The value stored by the node.
-		 *
-		 * @type {*}
-		 */
 		this.value = value;
-
-		/**
-		 * The node's parent. Null if the node is the root.
-		 *
-		 * @type {AVLTree.Node}
-		 */
 		this._parent = parent ? parent : null;
-
-		/**
-		 * The number of nodes in the subtree rooted at this node.
-		 *
-		 * @type {number}
-		 */
-		this.count = 1;
+		this.count = 1;  // Number of nodes in the subtree rooted at this node.
 	};
 	
 	/**
 	 * Prints out the ordered list to console. Will break Internet Explorer. Use for debugging only.
+	 * 
 	 * @param {String} padding Used by the method to increase padding for the node.
 	 * @private 
 	 */
