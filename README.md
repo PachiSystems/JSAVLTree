@@ -28,58 +28,76 @@ A JavaScript module implementing an Adelson-Velskii and Landis' tree in JavaScri
 		<th>Version Introduced</th>
 	</tr>
 	<tr>
-		<td>AVLNode</td>
-		<td>getRoot()</td>
-		<td>Returns the root node of the AVLTree object.</td>
-		<td>1.0.0</td>
+		<td>Boolean</td>
+		<td>add(value)</td>
+		<td>Inserts a node into the tree with the specified value if its not a  duplicate. If the value is inserted, the tree is balanced to enforce the AVL-Tree height property. False is returned if the vale is not inserted.</td>
+		<td>2.0.0</td>
 	</tr>
 	<tr>
-		<td>Integer</td>
-		<td>height(AVLNode)</td>
-		<td>Returns the height of the supplied AVLNode object.</td>
-		<td>1.0.0</td>
+		<td>*</td>
+		<td>remove(value)</td>
+		<td>Removes a node from the tree with the specified value if it exists. If a node is removed the tree is balanced again. The value of the removed node is returned or null.</td>
+		<td>2.0.0</td>
+	</tr>
+	<tr>
+		<td>Boolean</td>
+		<td>contains(value)</td>
+		<td>Returns true if the tree contains a node with the specified value, false otherwise.</td>
+		<td>2.0.0</td>
+	</tr>
+	<tr>
+		<td>Number</td>
+		<td>getCount(key)</td>
+		<td>Returns the number of values stored in the tree.</td>
+		<td>2.0.0</td>
+	</tr>
+	<tr>
+		<td>Number</td>
+		<td>getNthValue(n)</td>
+		<td>Returns an n-th smallest value, based on the comparator where 0 &lt;= n &lt; this.getCount().</td>
+		<td>2.0.0</td>
+	</tr>
+	<tr>
+		<td>*</td>
+		<td>getMinimum()</td>
+		<td>Returns the smallest value in the tree.</td>
+		<td>2.0.0</td>
+	</tr>
+	<tr>
+		<td>*</td>
+		<td>getMaximum()</td>
+		<td>Returns the largest value in the tree.</td>
+		<td>2.0.0</td>
+	</tr>
+	<tr>
+		<td>Number</td>
+		<td>getHeight()</td>
+		<td>Returns the height of the tree (the maximum depth).</td>
+		<td>2.0.0</td>
+	</tr>
+	<tr>
+		<td>Array</td>
+		<td>getValues()</td>
+		<td>Returns all values in the tree as an array in sorted order.</td>
+		<td>2.0.0</td>
 	</tr>
 	<tr>
 		<td>Void</td>
-		<td>insertNode(key)</td>
-		<td>Inserts the speficied key into the AVLTree and balances.</td>
-		<td>1.0.0</td>
+		<td>inOrderTraverse(Function, startValue)</td>
+		<td>Performs an in-order traversal of the tree and calls the passed function on each traversed node. Optionally starting from the smallest node with a value &gt;= to startValue. The traversal ends after traversing the tree's maximum node or when the passed function returns true.</td>
+		<td>2.0.0</td>
 	</tr>
 	<tr>
 		<td>Void</td>
-		<td>deleteNode(key)</td>
-		<td>Deletes the specified key from the AVLTree and balances.</td>
-		<td>1.0.0</td>
+		<td>reverseOrderTraverse(Function, startValue)</td>
+		<td>Performs a reverse-order traversal of the tree and calls the passed function on each node. Optionally starts from the largest node with a value &lt;= to the specified  start value. The traversal ends after traversing the tree's minimum node or when the passed function returns true.</td>
+		<td>2.0.0</td>
 	</tr>
 	<tr>
-		<td>AVLNode</td>
-		<td>findMinNode(AVLNode)</td>
-		<td>Finds the left-most node from the supplied AVLNode.</td>
-		<td>1.0.0</td>
-	</tr>
-	<tr>
-		<td>AVLNode</td>
-		<td>findMaxNode(AVLNode)</td>
-		<td>Finds the right-most node from the supplied AVLNode.</td>
-		<td>1.0.0</td>
-	</tr>
-	<tr>
-		<td>AVLNode</td>
-		<td>removeMinNode(AVLNode)</td>
-		<td>Removes and returns the left-most AVLNode from the supplied node and balances.</td>
-		<td>1.0.0</td>
-	</tr>
-	<tr>
-		<td>AVLNode</td>
-		<td>removeMaxNode(AVLNode)</td>
-		<td>Removes and returns the right-most AVLNode from the supplied AVLNode and balances.</td>
-		<td>1.0.0</td>
-	</tr>
-	<tr>
-		<td>Void</td>
+		<td></td>
 		<td>printAVLTree()</td>
-		<td>Outputs the AVLTree to the console (WARNING: Ensure that developer tools are enabled when using this method)</td>
-		<td>1.0.0</td>
+		<td></td>
+		<td>2.0.0</td>
 	</tr>
 </table>
 
@@ -87,6 +105,30 @@ AVLNode
 =======
 
 The AVLNode structure has its own methods which can be run. The AVLNode constructor is not exposed, and is only used internaly within AVLTree. However, there follows a method summary on what you can do with the AVLNode when you return or get them from the tree.
+## Property Summary
+
+<table>
+	<tr>
+		<th>Property</th>
+		<th>Type</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td>value</td>
+		<td>*</td>
+		<td>The value stored in the node. Bust be strings or numbers. Objects can be stored if converted to strings with JSON.stringify first. Ensure that you specify a relevant sort function for these to parse and then check values.</td>
+	</tr>
+	<tr>
+		<td>count</td>
+		<td>Number</td>
+		<td>Number of nodes in the subtree rooted at this node.</td>
+	</tr>
+	<tr>
+		<td>height</td>
+		<td>Number</td>
+		<td>The height of this tree rooted at this node.</td>
+	</tr>
+</table>
 
 ## Method Summary
 <table>
@@ -97,63 +139,15 @@ The AVLNode structure has its own methods which can be run. The AVLNode construc
 		<th>Version Introduced</th>
 	</tr>
 	<tr>
-		<td>Key</td>
-		<td>getItem()</td>
-		<td>Returns the Key stored in this AVLNode.</td>
-		<td>1.0.0</td>
+		<td>Boolean</td>
+		<td>isRightChild()</td>
+		<td>Returns true if the specified node has a parent and is the right child of its parent.</td>
+		<td>2.0.0</td>
 	</tr>
 	<tr>
 		<td>AVLNode</td>
-		<td>getLeft()</td>
-		<td>Returns the AVLNode to the left of this node (lower value)</td>
-		<td>1.0.0</td>
-	</tr>
-	<tr>
-		<td>Void</td>
-		<td>setLeft(AVLNode)</td>
-		<td>Sets the left of this node to the specified AVLNode. Does not balance after. Use AVLTree's insertNode method instead.</td>
-		<td>1.0.0</td>
-	</tr>
-	<tr>
-		<td>AVLNode</td>
-		<td>getRight()</td>
-		<td>Returns the AVLNode to the right of this node (higher value)</td>
-		<td>1.0.0</td>
-	</tr>
-	<tr>
-		<td>Void</td>
-		<td>setRight(AVLNode)</td>
-		<td>Sets the right of this node to the specified AVLNode. Does not balance after. Use AVLTree's insertNode method instead.</td>
-		<td>1.0.0</td>
-	</tr>
-	<tr>
-		<td>Integer</td>
-		<td>getHeight()</td>
-		<td>Returns the height of this AVLNode.</td>
-		<td>1.0.0</td>
-	</tr>
-	<tr>
-		<td>Integer</td>
-		<td>size(AVLNode)</td>
-		<td>Returns the size of the tree under the specified AVLNode.</td>
-		<td>1.0.0</td>
-	</tr>
-	<tr>
-		<td>Void</td>
-		<td>preorderPrint(padding)</td>
-		<td>Outputs the pre-ordered tree to console. ```padding``` is used to specify padding between dashes. (WARNING: Ensure that developer tools are enabled when using this method)</td>
-		<td>1.0.0</td>
-	</tr>
-	<tr>
-		<td>Void</td>
-		<td>inorderPrint(padding)</td>
-		<td>Outputs the in-order tree to the console. ```padding``` is used to specify padding between dashes. (WARNING: Ensure that developer tools are enabled when using this method)</td>
-		<td>1.0.0</td>
-	</tr>
-	<tr>
-		<td>Void</td>
-		<td>postorderPrint</td>
-		<td>Outputs the post-ordered tree to console. ```padding``` is used to specify padding between dashes. (WARNING: Ensure that developer tools are enabled when using this method)</td>
-		<td>1.0.0</td>
+		<td>isLeftChild()</td>
+		<td>Returns true if the specified node has a parent and is the left child of its parent.</td>
+		<td>2.0.0</td>
 	</tr>
 </table>

@@ -107,7 +107,7 @@
 
 	/**
 	 * Inserts a node into the tree with the specified value if its not a 
-	 * dupliacte. If the value is inserted, the tree is balanced to enforce
+	 * duplicate. If the value is inserted, the tree is balanced to enforce
 	 * the AVL-Tree height property.
 	 *
 	 * @param {*} value Value to insert into the tree.
@@ -776,7 +776,7 @@
 	AVLTree.Node.prototype.height = 1;
 
 	/**
-	 * Returns true iff the specified node has a parent and is the right child of
+	 * Returns true if the specified node has a parent and is the right child of
 	 * its parent.
 	 *
 	 * @return {boolean} Whether the specified node has a parent and is the right
@@ -787,7 +787,7 @@
 	};
 
 	/**
-	 * Returns true iff the specified node has a parent and is the left child of
+	 * Returns true if the specified node has a parent and is the left child of
 	 * its parent.
 	 *
 	 * @return {boolean} Whether the specified node has a parent and is the left
