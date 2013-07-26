@@ -12,9 +12,9 @@ A JavaScript module implementing an Adelson-Velskii and Landis' tree in JavaScri
 		<th>Version Introduced</th>
 	</tr>
 	<tr>
-		<td>AVLTree()</td>
-		<td>Creates an empty AVL Tree (self-balancing binary search tree)</td>
-		<td>1.0.0</td>
+		<td>AVLTree(comparator)</td>
+		<td>Creates an empty AVL Tree. Comparator is optional, but if supplied it should be a function which takes two variables (a, b) and return value &lt; 0 if a is less than b, return &gt; 0 if a is greater than b or return a 0 if equal or as a default. For numbers, you can simply return a-b within the function.</td>
+		<td>2.0.0</td>
 	</tr>
 </table>
 
