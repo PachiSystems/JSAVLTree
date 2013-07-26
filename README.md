@@ -94,9 +94,9 @@ A JavaScript module implementing an Adelson-Velskii and Landis' tree in JavaScri
 		<td>2.0.0</td>
 	</tr>
 	<tr>
-		<td></td>
+		<td>*</td>
 		<td>printAVLTree()</td>
-		<td></td>
+		<td>Outputs the AVLTree to console. Internet Explorer hates this with a passion. Use only for debug purposes.</td>
 		<td>2.0.0</td>
 	</tr>
 </table>
